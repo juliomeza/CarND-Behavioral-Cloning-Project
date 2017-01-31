@@ -13,12 +13,14 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import matplotlib.image as mpimg
 
-from keras.layers import Flatten, Dense, Activation, Input
+from keras.layers import Flatten, Dense, Activation, Input, Dropout, Lambda
 from keras.models import Model, Sequential
 
 import tensorflow as tf
 
 from sklearn.preprocessing import LabelBinarizer
+
+import json
 
 # Fix error with TF and Keras
 tf.python.control_flow_ops = tf
@@ -91,10 +93,30 @@ model = Sequential()
 model.add(Flatten(input_shape=(160, 320, 3)))
 model.add(Dense(128))
 model.add(Activation('relu'))
-model.add(Dense(43))
-model.add(Activation('softmax'))
+model.add(Dense(1))
+#model.add(Activation('softmax'))
 
+#print(model.summary())
 
-# Compile and train the model here.
+# Compile and train the model here. ALTERNATIVE 1
 #model.compile('adam', 'categorical_crossentropy', ['accuracy'])
+#print(model.summary())
 #history = model.fit(X_normalized, y_train, nb_epoch=2, validation_split=0.2)
+
+# Compile and train the model here. ALTERNATIVE 2
+batch_size = 64
+nb_classes = 1
+nb_epoch = 3
+
+model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
+
+history = model.fit(X_normalized, y_train, batch_size=batch_size, nb_epoch=nb_epoch,
+                    verbose=1, validation_split=0.2)
+print('History Generated')
+
+# Save Model
+json = model.to_json()
+model.save_weights('./model.h5', True)
+with open('./model.json', 'w') as f:
+	f.write(json)
+print('Model Saved')
