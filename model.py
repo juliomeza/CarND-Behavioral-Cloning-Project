@@ -1,4 +1,5 @@
 # ACTIVATE carnd: "activate carnd-term1"
+# RUN CAR: python drive.py model.json
 
 # Import Libraries
 import csv
@@ -104,9 +105,9 @@ model.add(Dense(1))
 #history = model.fit(X_normalized, y_train, nb_epoch=2, validation_split=0.2)
 
 # Compile and train the model here. ALTERNATIVE 2
-batch_size = 64
+batch_size = 128
 nb_classes = 1
-nb_epoch = 3
+nb_epoch = 10
 
 model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
 
