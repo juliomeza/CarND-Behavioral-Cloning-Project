@@ -16,6 +16,11 @@ import matplotlib.image as mpimg
 
 from keras.layers import Flatten, Dense, Activation, Input, Dropout, Lambda
 from keras.models import Model, Sequential
+from keras.layers.normalization import BatchNormalization
+from keras.layers.convolutional import Convolution2D
+from keras.layers.pooling import MaxPooling2D
+
+
 
 import tensorflow as tf
 
@@ -43,16 +48,11 @@ with open(training_file, mode='rb') as f:
 X_train = train['features']
 print('Train Data Loaded')
 print ('X_train Data Type After Loaded with Pickle: ' + str(type(X_train)))
-X_train = np.array(X_train) #converts from list to numpy.ndarray
-print('X_train Lenghth: ' + str(len(X_train)))
+#X_train = np.array(X_train) #converts from list to numpy.ndarray
+#print('X_train Lenghth: ' + str(len(X_train)))
 
 print('\nImage Shape: ' + str(X_train[0].shape))
 print('Image Type: ' + str(type(X_train[0])))
-
-# Plot One Image
-#plt.figure(figsize=(2,2))
-#plt.imshow(X_train[951])
-#plt.show()
 
 # PRINT VARIABLES FOR DEBUGING
 #print(X_train[25])
@@ -64,16 +64,21 @@ print('TYPE OF Y VARIABLE: ' + str(type(y_train)))
 X_train, y_train = shuffle(X_train, y_train)
 print('Data Shuffled')
 
-# Normalize Data to gray scale between -0.5 and 0.5 FUNCTION
-def normalize_grayscale(image_data):
-	a = -0.5
-	b = 0.5
-	grayscale_min = 0.0
-	grayscale_max = 255.0
-	return a + ( ( (image_data - grayscale_min)*(b - a) )/( grayscale_max - grayscale_min ) )
+# Plot One Image
+plt.figure(figsize=(2,2))
+plt.imshow(X_train[951])
+plt.show()
 
-X_normalized = normalize_grayscale(X_train)
-print('Data Normalized')
+# Normalize Data to gray scale between -0.5 and 0.5 FUNCTION
+#def normalize_grayscale(image_data):
+#	a = -0.5
+#	b = 0.5
+#	grayscale_min = 0.0
+#	grayscale_max = 255.0
+#	return a + ( ( (image_data - grayscale_min)*(b - a) )/( grayscale_max - grayscale_min ) )
+
+#X_normalized = normalize_grayscale(X_train)
+#print('Data Normalized')
 #print(X_normalized[951])
 
 #plt.figure(figsize=(2,2))
@@ -89,29 +94,53 @@ print('y_train TYPE: ' + str(type(y_train)))
 
 # Build a Multi-Layer Feedforward Network
 print('\nImage Shape: ' + str(X_train[0].shape))
+inputShape = (X_train[0].shape)
+dropout_prob = 0.5
+activation = 'elu'
 model = Sequential()
 
-model.add(Flatten(input_shape=(160, 320, 3)))
+model.add(Lambda(lambda x: x/255.0 - 0.5, input_shape=inputShape, output_shape=inputShape))
+
+model.add(Convolution2D(32, 3, 3, input_shape=(inputShape))) # El primer numero hago match con el sze shape
+#model.add(MaxPooling2D((2, 2)))
+#model.add(Dropout(0.5)) # Carro no llega tan lejos
+model.add(Activation('elu'))
+model.add(Flatten())
 model.add(Dense(128))
-model.add(Activation('relu'))
+model.add(Activation('elu'))
 model.add(Dense(1))
-#model.add(Activation('softmax'))
+#model.add(Convolution2D(24, 5, 5, subsample=(2, 2), border_mode="valid", activation=activation))
+
+
+#model.add(Convolution2D(36, 5, 5, subsample=(2, 2), border_mode="valid", activation=activation))
+#model.add(Convolution2D(48, 5, 5, subsample=(2, 2), border_mode="valid", activation=activation))
+#model.add(Convolution2D(64, 3, 3, subsample=(1, 1), border_mode="valid", activation=activation))
+#model.add(Convolution2D(64, 3, 3, subsample=(1, 1), border_mode="valid", activation=activation))
+#model.add(Flatten())
+#model.add(Dropout(dropout_prob))
+#model.add(Dense(1164, activation=activation))
+#model.add(Dropout(dropout_prob))
+#model.add(Dense(100, activation=activation))
+#model.add(Dense(50, activation=activation))
+#model.add(Dense(1, activation=activation))
+
+
+#model.add(Flatten(input_shape=(20, 40, 3)))
+#model.add(Dense(128))
+#model.add(Activation('elu'))
+#model.add(Dense(1))
+
 
 #print(model.summary())
-
-# Compile and train the model here. ALTERNATIVE 1
-#model.compile('adam', 'categorical_crossentropy', ['accuracy'])
-#print(model.summary())
-#history = model.fit(X_normalized, y_train, nb_epoch=2, validation_split=0.2)
 
 # Compile and train the model here. ALTERNATIVE 2
-batch_size = 128
+batch_size = 64
 nb_classes = 1
-nb_epoch = 10
+nb_epoch = 5
 
 model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
 
-history = model.fit(X_normalized, y_train, batch_size=batch_size, nb_epoch=nb_epoch,
+history = model.fit(X_train, y_train, batch_size=batch_size, nb_epoch=nb_epoch,
                     verbose=1, validation_split=0.2)
 print('History Generated')
 

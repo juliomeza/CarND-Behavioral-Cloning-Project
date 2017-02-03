@@ -15,9 +15,11 @@ from io import BytesIO
 from keras.models import model_from_json
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array
 
-# Fix error with Keras and TensorFlow
+# Fix error with Keras and TensorFlowimresize
 import tensorflow as tf
 tf.python.control_flow_ops = tf
+
+from scipy.misc import imread, imresize
 
 
 sio = socketio.Server()
@@ -37,6 +39,13 @@ def telemetry(sid, data):
     imgString = data["image"]
     image = Image.open(BytesIO(base64.b64decode(imgString)))
     image_array = np.asarray(image)
+    # Resize Image
+    shape=(20, 40, 3) # height, width, chanel
+    image_array = imresize(image_array, shape)
+    image_array = image_array.astype(float)
+    image_array /= 255.0
+    image_array -= 0.5
+    # Transform Image
     transformed_image_array = image_array[None, :, :, :]
     # This model currently assumes that the features of the model are just the images. Feel free to change this.
     steering_angle = float(model.predict(transformed_image_array, batch_size=1))
