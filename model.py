@@ -19,8 +19,7 @@ from keras.models import Model, Sequential
 from keras.layers.normalization import BatchNormalization
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
-
-
+from sklearn.model_selection import train_test_split
 
 import tensorflow as tf
 
@@ -60,9 +59,7 @@ print('Image Type: ' + str(type(X_train[0])))
 print('TYPE OF X VARIABLE: ' + str(type(X_train)))
 print('TYPE OF Y VARIABLE: ' + str(type(y_train)))
 
-# Shuffle the data
-X_train, y_train = shuffle(X_train, y_train)
-print('Data Shuffled')
+
 
 # Plot One Image
 plt.figure(figsize=(2,2))
@@ -86,10 +83,12 @@ plt.show()
 #plt.show()
 
 # One Hot encode the labels to the variable y_one_hot
-label_binarizer = LabelBinarizer()
+#label_binarizer = LabelBinarizer() # RECIENTEMENTE REMOVED #####
 #y_one_hot = label_binarizer.fit_transform(y_train)
 #print('ONE HOT ENCODE SHAPE: ' + str(y_one_hot.shape))
 print('y_train TYPE: ' + str(type(y_train)))
+
+
 
 # Crop Image
 X_train = X_train[:,13:32,:,:]
@@ -97,6 +96,14 @@ X_train = X_train[:,13:32,:,:]
 plt.figure(figsize=(2,2))
 plt.imshow(X_train[951])
 plt.show()
+
+# Create Validation Data (Split Data)
+X_train, X_validation, y_train, y_validation = train_test_split(X_train, y_train, test_size=0.2, random_state=0)
+print("Data Valdation Created")
+
+# Shuffle the data
+X_train, y_train = shuffle(X_train, y_train)
+print('Data Shuffled')
 
 # Build a Multi-Layer Network
 print('\nImage Shape: ' + str(X_train[0].shape))
@@ -130,7 +137,7 @@ nb_epoch = 15
 model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
 
 history = model.fit(X_train, y_train, batch_size=batch_size, nb_epoch=nb_epoch,
-                    verbose=1, validation_split=0.2) #validation_data=(X_valid, y_valid)
+                    verbose=1, validation_data=(X_validation, y_validation))
 
 print('History Generated')
 
