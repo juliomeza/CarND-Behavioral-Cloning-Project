@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import matplotlib.image as mpimg
 
-from keras.layers import Flatten, Dense, Activation, Input, Dropout, Lambda
+from keras.layers import Flatten, Dense, Activation, Input, Dropout, Lambda, ELU
 from keras.models import Model, Sequential
 from keras.layers.normalization import BatchNormalization
 from keras.layers.convolutional import Convolution2D
@@ -101,34 +101,31 @@ model = Sequential()
 
 model.add(Lambda(lambda x: x/255.0 - 0.5, input_shape=inputShape, output_shape=inputShape))
 
-model.add(Convolution2D(32, 3, 3, input_shape=(inputShape))) # El primer numero hago match con el sze shape
+#model.add(Convolution2D(16, 3, 3, input_shape=(inputShape)))
+model.add(Convolution2D(32, 3, 3, border_mode='same', activation='elu'))
+model.add(Convolution2D(64, 3, 3, border_mode='same', activation='elu'))
+
+model.add(Dropout(0.5))
+
+model.add(Convolution2D(128, 3, 3, border_mode='same', activation='elu'))
+model.add(Convolution2D(256, 3, 3, border_mode='same', activation='elu'))
+
+model.add(Dropout(0.5))
+
 #model.add(MaxPooling2D((2, 2)))
 #model.add(Dropout(0.5)) # Carro no llega tan lejos
-model.add(Activation('elu'))
-model.add(Flatten())
-model.add(Dense(128))
-model.add(Activation('elu'))
-model.add(Dense(1))
-#model.add(Convolution2D(24, 5, 5, subsample=(2, 2), border_mode="valid", activation=activation))
 
-
-#model.add(Convolution2D(36, 5, 5, subsample=(2, 2), border_mode="valid", activation=activation))
-#model.add(Convolution2D(48, 5, 5, subsample=(2, 2), border_mode="valid", activation=activation))
-#model.add(Convolution2D(64, 3, 3, subsample=(1, 1), border_mode="valid", activation=activation))
-#model.add(Convolution2D(64, 3, 3, subsample=(1, 1), border_mode="valid", activation=activation))
-#model.add(Flatten())
-#model.add(Dropout(dropout_prob))
-#model.add(Dense(1164, activation=activation))
-#model.add(Dropout(dropout_prob))
-#model.add(Dense(100, activation=activation))
-#model.add(Dense(50, activation=activation))
-#model.add(Dense(1, activation=activation))
-
-
-#model.add(Flatten(input_shape=(20, 40, 3)))
-#model.add(Dense(128))
 #model.add(Activation('elu'))
-#model.add(Dense(1))
+model.add(Flatten())
+
+#model.add(Activation('elu'))
+model.add(Dense(1024, activation='elu'))
+model.add(Dense(512, activation='elu'))
+model.add(Dense(128, activation='elu'))
+model.add(Dense(1, activation='elu'))
+
+
+
 
 
 #print(model.summary())
