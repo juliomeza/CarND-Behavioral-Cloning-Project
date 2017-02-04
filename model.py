@@ -91,54 +91,47 @@ label_binarizer = LabelBinarizer()
 #print('ONE HOT ENCODE SHAPE: ' + str(y_one_hot.shape))
 print('y_train TYPE: ' + str(type(y_train)))
 
+# Crop Image
+X_train = X_train[:,13:32,:,:]
+# Plot One Image
+plt.figure(figsize=(2,2))
+plt.imshow(X_train[951])
+plt.show()
 
-# Build a Multi-Layer Feedforward Network
+# Build a Multi-Layer Network
 print('\nImage Shape: ' + str(X_train[0].shape))
 inputShape = (X_train[0].shape)
-dropout_prob = 0.5
-activation = 'elu'
+
 model = Sequential()
 
-model.add(Lambda(lambda x: x/255.0 - 0.5, input_shape=inputShape, output_shape=inputShape))
-
-#model.add(Convolution2D(16, 3, 3, input_shape=(inputShape)))
-model.add(Convolution2D(32, 3, 3, border_mode='same', activation='elu'))
-model.add(Convolution2D(64, 3, 3, border_mode='same', activation='elu'))
-
-model.add(Dropout(0.5))
-
-model.add(Convolution2D(128, 3, 3, border_mode='same', activation='elu'))
-model.add(Convolution2D(256, 3, 3, border_mode='same', activation='elu'))
-
-model.add(Dropout(0.5))
-
-#model.add(MaxPooling2D((2, 2)))
-#model.add(Dropout(0.5)) # Carro no llega tan lejos
-
-#model.add(Activation('elu'))
+model.add(Lambda(lambda x: x/127.5 - 1.0, input_shape=inputShape, output_shape=inputShape))
+model.add(Convolution2D(16, 8, 8, subsample=(4,4), border_mode='same'))
+model.add(ELU())
+model.add(Convolution2D(32, 5, 5, subsample=(2,2), border_mode='same'))
+model.add(ELU())
+model.add(Convolution2D(64, 5, 5, subsample=(2,2), border_mode='same'))
 model.add(Flatten())
+model.add(Dropout(0.2))
+model.add(ELU())
+model.add(Dense(512))
+model.add(Dropout(0.5))
+model.add(ELU())
+model.add(Dense(1))
 
-#model.add(Activation('elu'))
-model.add(Dense(1024, activation='elu'))
-model.add(Dense(512, activation='elu'))
-model.add(Dense(128, activation='elu'))
-model.add(Dense(1, activation='elu'))
-
-
-
-
+#model.add(MaxPooling2D(pool_size=(2,2))) ?????
 
 #print(model.summary())
 
 # Compile and train the model here. ALTERNATIVE 2
 batch_size = 64
 nb_classes = 1
-nb_epoch = 5
+nb_epoch = 15
 
 model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
 
 history = model.fit(X_train, y_train, batch_size=batch_size, nb_epoch=nb_epoch,
-                    verbose=1, validation_split=0.2)
+                    verbose=1, validation_split=0.2) #validation_data=(X_valid, y_valid)
+
 print('History Generated')
 
 # Save Model

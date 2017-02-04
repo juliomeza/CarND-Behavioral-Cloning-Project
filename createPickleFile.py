@@ -17,7 +17,7 @@ for i in range(len(dirListing)):
 
 
 # Resize Images
-shape=(20, 40, 3) # height, width, chanel
+shape=(32, 64, 3) # height, width, chanel
 resize_images = []
 for i in range(len(new_images)):
     resize_images.append(imresize(new_images[i], shape))
@@ -36,10 +36,14 @@ plt.imshow(resize_images[951])
 plt.show()
 
 # Normalize Images
-resize_images = resize_images.astype(float)
-resize_images /= 255.0
-resize_images -= 0.5
-print('Data Normalized')
+#resize_images = resize_images.astype(float)
+#resize_images /= 255.0
+#resize_images -= 0.5
+#print('Data Normalized')
+
+# Crop Images
+#resize_images = resize_images[:,60:140,:,:]
+
 
 # Save the data for easy access
 pickle_file = 'train.pickle'

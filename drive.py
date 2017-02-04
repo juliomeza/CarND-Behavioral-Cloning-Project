@@ -39,12 +39,18 @@ def telemetry(sid, data):
     imgString = data["image"]
     image = Image.open(BytesIO(base64.b64decode(imgString)))
     image_array = np.asarray(image)
+    
+    # JLIO: IMAGE CHANGES
     # Resize Image
-    shape=(20, 40, 3) # height, width, chanel
+    shape=(32, 64, 3) # height, width, chanel
     image_array = imresize(image_array, shape)
+    # Crop Image
+    image_array = image_array[13:32,:,:] #Ultimo cambio
+    # Normalize Image
     image_array = image_array.astype(float)
-    image_array /= 255.0
-    image_array -= 0.5
+    image_array /= 127.5
+    image_array -= 1.0
+    
     # Transform Image
     transformed_image_array = image_array[None, :, :, :]
     # This model currently assumes that the features of the model are just the images. Feel free to change this.
